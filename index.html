@@ -298,9 +298,7 @@
       transition: transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       will-change: transform;
     }
-    #slide-track.dragging {
-      transition: none;
-    }
+
 
     .slide-page {
       flex: 0 0 calc(100% / 4);
@@ -1943,8 +1941,8 @@
     <div class="dot" id="dot-3"></div>
   </div>
 
-  <!-- Swipe hint -->
-  <div id="swipe-hint">← swipe →</div>
+  <!-- Page hint -->
+  <div id="swipe-hint">← tap arrows →</div>
 
   <!-- Slide Nav Buttons -->
   <button class="slide-nav-btn hidden" id="nav-prev" onclick="navPrev()" aria-label="Previous page">&#8249;</button>
@@ -2019,51 +2017,8 @@ function goToPage(n, anim = true) {
   updateTrack();
 }
 
-/* --- Touch & Mouse Swipe --- */
-let swipeStartX = 0, swipeStartY = 0;
-let dragging = false, dragOffset = 0;
-const SWIPE_THRESH = 60;
-
-function onDragStart(x, y) {
-  swipeStartX = x; swipeStartY = y;
-  dragging = true; dragOffset = 0;
-  track.classList.add('dragging');
-}
-function onDragMove(x, y) {
-  if (!dragging) return;
-  const dx = x - swipeStartX;
-  const dy = y - swipeStartY;
-  // If primarily vertical, cancel
-  if (Math.abs(dy) > Math.abs(dx) * 1.8) { dragging = false; return; }
-  dragOffset = dx;
-  const base = -currentPage * (100 / TOTAL_PAGES);
-  const pct = (dx / window.innerWidth) * (100 / TOTAL_PAGES);
-  track.style.transform = `translateX(calc(${base}% + ${dx}px))`;
-}
-function onDragEnd() {
-  if (!dragging) return;
-  dragging = false;
-  track.classList.remove('dragging');
-  if (dragOffset < -SWIPE_THRESH && currentPage < TOTAL_PAGES - 1) {
-    currentPage++;
-  } else if (dragOffset > SWIPE_THRESH && currentPage > 0) {
-    currentPage--;
-  }
-  updateTrack();
-}
-
-// Touch events
+// App reference (for future use)
 const app = document.getElementById('app');
-app.addEventListener('touchstart', e => { onDragStart(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-app.addEventListener('touchmove',  e => { onDragMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-app.addEventListener('touchend',   () => onDragEnd());
-
-// Mouse drag (desktop)
-app.addEventListener('mousedown', e => { if (e.target.closest('.music-player') || e.target.closest('#polaroid-overlay') || e.target.closest('.letter-cake-btn') || e.target.closest('.deck-card') || e.target.closest('.candle')) return; onDragStart(e.clientX, e.clientY); });
-document.addEventListener('mousemove', e => {
-  onDragMove(e.clientX, e.clientY);
-});
-document.addEventListener('mouseup', () => onDragEnd());
 
 // Keyboard arrows
 document.addEventListener('keydown', e => {
