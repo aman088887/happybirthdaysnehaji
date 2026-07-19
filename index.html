@@ -1611,6 +1611,47 @@
       .home-card-wrap { min-height: 400px; }
       .welcome-card { padding: 60px 52px 64px; }
     }
+
+    /* ===== SLIDE NAV BUTTONS ===== */
+    .slide-nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 400;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 18px rgba(123, 94, 167, 0.28), 0 1px 6px rgba(0,0,0,0.1);
+      border: 1.5px solid rgba(168, 85, 247, 0.25);
+      color: #7b5ea7;
+      transition: opacity 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .slide-nav-btn:hover {
+      background: rgba(168, 85, 247, 0.92);
+      color: #fff;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 6px 24px rgba(168, 85, 247, 0.5);
+    }
+    .slide-nav-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+    .slide-nav-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #nav-prev { left: 10px; }
+    #nav-next { right: 10px; }
   </style>
 </head>
 
@@ -1905,6 +1946,10 @@
   <!-- Swipe hint -->
   <div id="swipe-hint">← swipe →</div>
 
+  <!-- Slide Nav Buttons -->
+  <button class="slide-nav-btn hidden" id="nav-prev" onclick="navPrev()" aria-label="Previous page">&#8249;</button>
+  <button class="slide-nav-btn" id="nav-next" onclick="navNext()" aria-label="Next page">&#8250;</button>
+
 </div><!-- end app -->
 
 <!-- POLAROID OVERLAY -->
@@ -1939,6 +1984,14 @@ const TOTAL_PAGES = 4;
 let currentPage = 0;
 const track = document.getElementById('slide-track');
 
+function updateNavBtns() {
+  const prev = document.getElementById('nav-prev');
+  const next = document.getElementById('nav-next');
+  if (!prev || !next) return;
+  prev.classList.toggle('hidden', currentPage === 0);
+  next.classList.toggle('hidden', currentPage === TOTAL_PAGES - 1);
+}
+
 function updateTrack(instant = false) {
   if (instant) track.style.transition = 'none';
   track.style.transform = `translateX(-${currentPage * (100 / TOTAL_PAGES)}%)`;
@@ -1948,7 +2001,11 @@ function updateTrack(instant = false) {
     const dot = document.getElementById('dot-' + i);
     if (dot) dot.classList.toggle('active', i === currentPage);
   }
+  updateNavBtns();
 }
+
+function navPrev() { goToPage(currentPage - 1); }
+function navNext() { goToPage(currentPage + 1); }
 
 function goToPage(n, anim = true) {
   n = Math.max(0, Math.min(TOTAL_PAGES - 1, n));
